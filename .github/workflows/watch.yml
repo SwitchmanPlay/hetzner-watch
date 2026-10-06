@@ -1,0 +1,43 @@
+name: watch
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # every 30 min (GitHub may delay runs by a few minutes)
+  workflow_dispatch:
+    inputs:
+      send_test:
+        description: "Send a test message to Telegram"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write # to commit state.json, so we only ping on changes
+
+concurrency:
+  group: watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check availability
+        env:
+          SERVERS: ${{ vars.SERVERS || 'ex44' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SEND_TEST: ${{ inputs.send_test }}
+        run: python3 check.py
+
+      - name: Save state
+        run: |
+          if ! git diff --quiet -- state.json || [ -n "$(git ls-files --others -- state.json)" ]; then
+            git config user.name "hetzner-watch"
+            git config user.email "hetzner-watch@users.noreply.github.com"
+            git add state.json
+            git commit -m "state: $(tr -d '\n ' < state.json)"
+            git push
+          fi
