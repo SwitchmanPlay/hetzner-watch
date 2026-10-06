@@ -15,7 +15,7 @@ import urllib.request
 SERVERS = [s.strip().lower() for s in os.environ.get("SERVERS", "ex44").split(",") if s.strip()]
 STATE_FILE = os.environ.get("STATE_FILE", "state.json")
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID", "")
+TG_CHATS = [c.strip() for c in os.environ.get("TELEGRAM_CHAT_ID", "").split(",") if c.strip()]
 
 BASE = "https://www.hetzner.com"
 LIVE_URL = f"{BASE}/_resources/app/data/app/live_data_upfront.json"
@@ -71,17 +71,25 @@ def orderable_variants(server, live):
 
 
 def send_telegram(text):
-    if not (TG_TOKEN and TG_CHAT):
+    if not (TG_TOKEN and TG_CHATS):
         print("[telegram not configured]", text)
         return
-    data = json.dumps({"chat_id": TG_CHAT, "text": text, "disable_web_page_preview": True}).encode()
-    req = urllib.request.Request(
-        f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
-        data=data,
-        headers={"Content-Type": "application/json"},
-    )
-    with urllib.request.urlopen(req, timeout=30) as r:
-        r.read()
+    failed = []
+    for chat in TG_CHATS:
+        data = json.dumps({"chat_id": chat, "text": text, "disable_web_page_preview": True}).encode()
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
+            data=data,
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                r.read()
+        except Exception as e:  # e.g. 403 if that person never pressed Start
+            print(f"telegram send to {chat} failed: {e}", file=sys.stderr)
+            failed.append(chat)
+    if len(failed) == len(TG_CHATS):
+        raise RuntimeError("could not deliver Telegram message to anyone")
 
 
 def main():

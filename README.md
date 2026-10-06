@@ -13,7 +13,8 @@ How it works: the configurator page is a JS app, so `curl | grep` sees nothing. 
 
 1. In Telegram, talk to **@BotFather** → `/newbot` → copy the token.
 2. Open your new bot and press **Start**.
-3. Run `./setup_telegram.sh` from this folder and paste the token.
+3. Set chat IDs: `gh secret set TELEGRAM_CHAT_ID --body "id1,id2"` (each person presses Start in the bot).
+4. Run `./setup_telegram.sh` and paste the token.
 
 ## Watch other servers
 
