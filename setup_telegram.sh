@@ -2,7 +2,7 @@
 # Connects the watcher to your Telegram bot: finds your chat ID, stores both as
 # GitHub secrets, and triggers a test run. The token stays on your machine.
 set -euo pipefail
-cd "$(dirname "$0")"
+REPO=OPA-SMM/hetzner-watch
 
 read -rsp "Paste the bot token from @BotFather: " TOKEN; echo
 [ -n "$TOKEN" ] || { echo "No token given."; exit 1; }
@@ -16,7 +16,7 @@ if [ -z "$CHAT_ID" ]; then
 fi
 echo "Found chat ID: $CHAT_ID"
 
-printf '%s' "$TOKEN"   | gh secret set TELEGRAM_BOT_TOKEN
-printf '%s' "$CHAT_ID" | gh secret set TELEGRAM_CHAT_ID
-gh workflow run watch.yml -f send_test=true
+printf '%s' "$TOKEN"   | gh secret set TELEGRAM_BOT_TOKEN -R "$REPO"
+printf '%s' "$CHAT_ID" | gh secret set TELEGRAM_CHAT_ID -R "$REPO"
+gh workflow run watch.yml -R "$REPO" -f send_test=true
 echo "Done. A test message should arrive in Telegram within a minute."
