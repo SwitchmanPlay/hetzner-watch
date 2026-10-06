@@ -2,7 +2,7 @@
 # Connects the watcher to your Telegram bot: finds your chat ID, stores both as
 # GitHub secrets, and triggers a test run. The token stays on your machine.
 set -euo pipefail
-REPO=OPA-SMM/hetzner-watch
+REPO=SwitchmanPlay/hetzner-watch
 
 read -rsp "Paste the bot token from @BotFather: " TOKEN; echo
 [ -n "$TOKEN" ] || { echo "No token given."; exit 1; }
