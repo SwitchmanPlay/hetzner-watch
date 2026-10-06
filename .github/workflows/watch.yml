@@ -2,7 +2,7 @@ name: watch
 
 on:
   schedule:
-    - cron: "*/30 * * * *" # every 30 min (GitHub may delay runs by a few minutes)
+    - cron: "*/5 * * * *" # every 5 min, GitHub's minimum (runs can be delayed under load)
   workflow_dispatch:
     inputs:
       send_test:

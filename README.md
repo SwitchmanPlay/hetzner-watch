@@ -1,6 +1,6 @@
 # hetzner-watch
 
-Checks Hetzner dedicated-server configurators every 30 minutes (GitHub Actions) and sends a Telegram message when a server becomes orderable ("Order now"), and again when it disappears.
+Checks Hetzner dedicated-server configurators every 5 minutes (GitHub Actions) and sends a Telegram message when a server becomes orderable ("Order now"), and again when it disappears.
 
 How it works: the configurator page is a JS app, so `curl | grep` sees nothing. The page itself reads two JSON files:
 
